@@ -62,11 +62,12 @@ class _DetailPageState extends State<DetailPage>
 
   /// Get Images
   void getImages(String? value) {
-    try{
+    try {
       if (value != null) {
         List response = jsonDecode(value);
         for (var item in response) {
-          breedsList.addAll(Network.parseBreedsList(jsonEncode(item['breeds'])));
+          breedsList
+              .addAll(Network.parseBreedsList(jsonEncode(item['breeds'])));
           catList.add(item['url']);
         }
         setState(() {});
@@ -74,8 +75,7 @@ class _DetailPageState extends State<DetailPage>
       } else {
         Log.i("Null Response");
       }
-    }
-    catch(e){
+    } catch (e) {
       Log.i(e.toString());
     }
   }
@@ -88,22 +88,25 @@ class _DetailPageState extends State<DetailPage>
         backgroundColor: Colors.black,
       ),
       body: (widget.cat != null)
-          ? Hero(
-            tag: widget.cat!.id,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: InteractiveViewer(
-                child: CachedNetworkImage(
-                    imageUrl: widget.cat!.url,
-                    placeholder: (context, index) => AspectRatio(
-                        aspectRatio: widget.cat!.width / widget.cat!.height,
-                        child: Container(
-                          color: Colors.grey.shade200,
-                        )),
+          ? Align(
+              alignment: Alignment.topCenter,
+              child: Hero(
+                tag: widget.cat!.id,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: InteractiveViewer(
+                    child: CachedNetworkImage(
+                      imageUrl: widget.cat!.url,
+                      placeholder: (context, index) => AspectRatio(
+                          aspectRatio: widget.cat!.width / widget.cat!.height,
+                          child: Container(
+                            color: Colors.grey.shade200,
+                          )),
+                    ),
                   ),
+                ),
               ),
-            ),
-          )
+            )
           : Hero(
               tag: widget.breed!.image!.id!,
               child: Container(

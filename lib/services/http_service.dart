@@ -1,9 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:thecatapp/models/breed_model.dart';
 import 'package:thecatapp/models/cat_model.dart';
+import 'package:thecatapp/utils/utils.dart';
 
 import 'log_service.dart';
 
@@ -122,13 +121,6 @@ class Network {
       'page': '$page',
       'breed_ids': id,
     };
-    return params;
-  }
-
-
-  /// PARAM POST ///
-  static Map<String, String> paramsCreate() {
-    Map<String, String> params = {'sub_id': ''};
     return params;
   }
 

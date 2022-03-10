@@ -6,6 +6,9 @@ import 'package:lottie/lottie.dart';
 import 'package:thecatapp/models/cat_model.dart';
 import 'package:thecatapp/pages/detail_page.dart';
 import 'package:thecatapp/services/http_service.dart';
+import 'package:thecatapp/utils/glow_widget.dart';
+import 'package:thecatapp/utils/post_cat.dart';
+import 'package:thecatapp/utils/utils.dart';
 import '../services/log_service.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -16,7 +19,7 @@ class CategoryPage extends StatefulWidget {
   _CategoryPageState createState() => _CategoryPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClientMixin {
   bool isLoading = true;
   int selectedCategory = 1;
   int selected = 0;
@@ -70,72 +73,56 @@ class _CategoryPageState extends State<CategoryPage> {
             /// NotificationListener work when User reach last post
             Stack(
               children: [
-                ScrollConfiguration(
-                    behavior: const ScrollBehavior(),
-                    child: GlowingOverscrollIndicator(
-                      axisDirection: AxisDirection.down,
-                      color: Colors.white,
-                      child: NestedScrollView(
-                        floatHeaderSlivers: true,
-                        headerSliverBuilder:
-                            (BuildContext context, bool innerBoxIsScrolled) {
-                          return [
-                            SliverList(
-                                delegate: SliverChildListDelegate([
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.14,
-                                child: ListView.builder(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 5),
-                                    itemCount: categories.length,
-                                    scrollDirection: Axis.horizontal,
-                                    itemBuilder: (ctx, index) {
-                                      return storyItems(index);
-                                    }),
-                              ),
-                            ]))
-                          ];
-                        },
-                        body: NotificationListener<ScrollNotification>(
-                          onNotification: (ScrollNotification scrollInfo) {
-                            if (!isLoadMore &&
-                                scrollInfo.metrics.pixels ==
-                                    scrollInfo.metrics.maxScrollExtent) {
-                              getCatImages(selectedCategory);
-                              // start loading data
-                              setState(() {});
-                            }
-                            return true;
-                          },
-                          child: MasonryGridView.count(
-                            padding:
-                                EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            itemCount: catList.length,
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            itemBuilder: (context, index) {
-                              return postItems(catList[index]);
-                            },
+                Glow(
+                  child: NestedScrollView(
+                    floatHeaderSlivers: true,
+                    headerSliverBuilder:
+                        (BuildContext context, bool innerBoxIsScrolled) {
+                      return [
+                        SliverList(
+                            delegate: SliverChildListDelegate([
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.14,
+                            child: ListView.builder(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 5),
+                                itemCount: categories.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (ctx, index) {
+                                  return storyItems(index);
+                                }),
                           ),
-                        ),
+                        ]))
+                      ];
+                    },
+                    body: NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification scrollInfo) {
+                        if (!isLoadMore &&
+                            scrollInfo.metrics.pixels ==
+                                scrollInfo.metrics.maxScrollExtent) {
+                          getCatImages(selectedCategory);
+                          // start loading data
+                          setState(() {});
+                        }
+                        return true;
+                      },
+                      child: MasonryGridView.count(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        itemCount: catList.length,
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        itemBuilder: (context, index) {
+                          return PostCat(cat:catList[index]);
+                        },
                       ),
                     ),
                   ),
+                ),
                 /// Lottie_Loading appear when User reach last post and start Load More
                 isLoadMore
-                    ? AnimatedContainer(
-                  curve: Curves.easeIn,
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(color: Colors.white54),
-                  duration: const Duration(milliseconds: 4),
-
-                  /// Lottie_Loading appear when User reach last post and start Load More
-                  child: Center(
-                      child: Lottie.asset('assets/anims/loading.json',
-                          width: 100)),
-                )
+                    ? WidgetsCatalog.loadMoreAnim(context)
                     : SizedBox.shrink(),
               ],
             ),
@@ -143,54 +130,6 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  /// Picture Posts
-  Widget postItems(Cat cat) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(PageRouteBuilder(
-                fullscreenDialog: true,
-                transitionDuration: Duration(milliseconds: 1000),
-                pageBuilder: (BuildContext context, Animation<double> animation,
-                    Animation<double> secondaryAnimation) {
-                  return DetailPage(
-                    cat: cat,
-                  );
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.elasticInOut,
-                    ),
-                    child: child,
-                  );
-                }));
-          },
-          child: Hero(
-            tag: cat.id,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                imageUrl: cat.url,
-                placeholder: (context, index) => AspectRatio(
-                  aspectRatio: cat.width / cat.height,
-                  child: Image(
-                    fit: BoxFit.cover,
-                    image: AssetImage("assets/images/im_placeholder.png"),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget storyItems(int index) {
     return GestureDetector(
@@ -239,4 +178,7 @@ class _CategoryPageState extends State<CategoryPage> {
       ),
     );
   }
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

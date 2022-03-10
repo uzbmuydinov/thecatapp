@@ -1,11 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:lottie/lottie.dart';
 import 'package:thecatapp/models/cat_model.dart';
-import 'package:thecatapp/pages/detail_page.dart';
 import 'package:thecatapp/services/http_service.dart';
+import 'package:thecatapp/utils/post_cat.dart';
+import 'package:thecatapp/utils/utils.dart';
 
 import '../services/log_service.dart';
 
@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   bool isLoading = true;
   int selectedCategory = 0;
   bool isLoadMore = false;
@@ -85,38 +85,20 @@ class _HomePageState extends State<HomePage> {
                 return true;
               },
               child: MasonryGridView.count(
-                padding:
-                EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 itemCount: catList.length,
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 itemBuilder: (context, index) {
-                  return postItems(catList[index]);
+                  return PostCat(cat: catList[index]);
                 },
               ),
             ),
 
             /// Lottie_Loading appear when User reach last post and start Load More
             isLoadMore
-                ? AnimatedContainer(
-              curve: Curves.easeIn,
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height,
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
-              decoration: BoxDecoration(color: Colors.white54),
-              duration: const Duration(milliseconds: 4),
-
-              /// Lottie_Loading appear when User reach last post and start Load More
-              child: Center(
-                  child: Lottie.asset('assets/anims/loading.json',
-                      width: 100)),
-            )
+                ? WidgetsCatalog.loadMoreAnim(context)
                 : const SizedBox.shrink(),
           ],
         ),
@@ -124,54 +106,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// Picture Posts
-  Widget postItems(Cat cat) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(PageRouteBuilder(
-                fullscreenDialog: true,
-                transitionDuration: Duration(milliseconds: 1000),
-                pageBuilder: (BuildContext context, Animation<double> animation,
-                    Animation<double> secondaryAnimation) {
-                  return DetailPage(
-                    cat: cat,
-                  );
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.elasticInOut,
-                    ),
-                    child: child,
-                  );
-                }));
-          },
-          child: Hero(
-            tag: cat.id,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                imageUrl: cat.url,
-                placeholder: (context, index) =>
-                    AspectRatio(
-                      aspectRatio: cat.width / cat.height,
-                      child: Image(
-                        fit: BoxFit.cover,
-                        image: AssetImage("assets/images/im_placeholder.png"),
-                      ),
-                    ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
 }

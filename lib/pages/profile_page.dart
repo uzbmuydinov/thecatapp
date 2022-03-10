@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -8,11 +6,11 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
 import 'package:thecatapp/services/http_service.dart';
+import 'package:thecatapp/utils/glow_widget.dart';
+import 'package:thecatapp/utils/post_cat.dart';
 import 'package:thecatapp/utils/utils.dart';
-
 import '../models/cat_model.dart';
 import '../services/log_service.dart';
-import 'detail_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -22,7 +20,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin{
   bool isLoading = true;
   bool isLoadMore = false;
   final picker = ImagePicker();
@@ -35,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
     getCatImages();
   }
 
-  void getCatImages() {
+  Future <void> getCatImages() async{
     Network.GET(Network.API_GET_UPLOADS, Network.paramsGet(0)).then((value) {
       if (value != null) {
         catList.clear();
@@ -52,10 +50,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Add Post
-  void addPost() {
-    _getImage().then((value) {
-      _apiUploadImage(value).then((value) {
-        getCatImages();
+  void addPost(BuildContext context) {
+    _getImage().then((path) {
+      _apiUploadImage(path, context).then((value){
+        if(value == 'Bad Request'){
+        WidgetsCatalog.showSnackBar(context, 'No cat found !!!');
+        isLoadMore = false;
+        setState(() {});
+        }
+        else{
+          getCatImages().then((value){
+            WidgetsCatalog.showSnackBar(context, 'Successfully added post');
+          });
+        }
       });
     });
   }
@@ -72,19 +79,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Upload image
-  Future _apiUploadImage(var image) async {
-    setState(() {});
-    await Network.POST(Network.API_UPLOAD, image.path, Network.paramsCreate())
-        .then((response) {
-      Log.w(response.toString());
-    });
+  Future _apiUploadImage(var image,BuildContext context) async {
+   String? data =  await Network.POST(Network.API_UPLOAD, image.path, Network.paramEmpty());
+   return data;
   }
+
 
   /// Get Image from local device
   Future<File?> _getImage() async {
     File? file;
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         isLoadMore = true;
@@ -111,61 +115,45 @@ class _ProfilePageState extends State<ProfilePage> {
           ? Center(child: Lottie.asset('assets/anims/loading.json', width: 100))
           : Stack(
               children: [
-                ScrollConfiguration(
-                  behavior: ScrollBehavior(),
-                  child: GlowingOverscrollIndicator(
-                    axisDirection: AxisDirection.down,
-                    color: Colors.white,
-                    child: NestedScrollView(
-                      floatHeaderSlivers: true,
-                        headerSliverBuilder:
-                            (BuildContext context, bool innerBoxIsScrolled) {
-                          return [
-                            SliverList(
-                                delegate: SliverChildListDelegate(
-                                    [profileDetails(context)]))
-                          ];
-                        },
-                        body: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              textFieldWidget(context),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              MasonryGridView.count(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
-                                itemCount: catList.length,
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                itemBuilder: (context, index) {
-                                  return postItems(catList[index],index);
-                                },
-                              ),
-                            ],
-                          ),
-                        )),
-                  ),
+                Glow(
+                  child: NestedScrollView(
+                    floatHeaderSlivers: true,
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return [
+                          SliverList(
+                              delegate: SliverChildListDelegate(
+                                  [profileDetails(context)]))
+                        ];
+                      },
+                      body: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            textFieldWidget(context),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            MasonryGridView.count(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              itemCount: catList.length,
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              itemBuilder: (context, index) {
+                                return postItems(catList[index],index);
+                              },
+                            ),
+                          ],
+                        ),
+                      )),
                 ),
 
                 /// Lottie_Loading appear when User reach last post and start Load More
                 isLoadMore
-                    ? AnimatedContainer(
-                        curve: Curves.easeIn,
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(color: Colors.white54),
-                        duration: const Duration(milliseconds: 4),
-
-                        /// Lottie_Loading appear when User reach last post and start Load More
-                        child: Center(
-                            child: Lottie.asset('assets/anims/loading.json',
-                                width: 100)),
-                      )
+                    ? WidgetsCatalog.loadMoreAnim(context)
                     : SizedBox.shrink(),
               ],
             ),
@@ -233,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
             IconButton(
                 iconSize: 30,
                 onPressed: () {
-                  addPost();
+                  addPost(context);
                 },
                 icon: const Icon(CupertinoIcons.add)),
             const Text(
@@ -306,92 +294,58 @@ class _ProfilePageState extends State<ProfilePage> {
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(PageRouteBuilder(
-                fullscreenDialog: true,
-                transitionDuration: Duration(milliseconds: 1000),
-                pageBuilder: (BuildContext context, Animation<double> animation,
-                    Animation<double> secondaryAnimation) {
-                  return DetailPage(
-                    cat: cat,
-                  );
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.elasticInOut,
-                    ),
-                    child: child,
-                  );
-                }));
-          },
-          child: Hero(
-            tag: cat.id,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                imageUrl: cat.url,
-                placeholder: (context, index) => AspectRatio(
-                  aspectRatio: cat.width / cat.height,
-                  child: Image(
-                    fit: BoxFit.cover,
-                    image: AssetImage("assets/images/im_placeholder.png"),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        SpeedDial(
-          icon: Icons.more_horiz,
-          iconTheme: const IconThemeData(
-            size: 35,
-
-          ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(bottomRight: Radius.circular(15),topLeft: Radius.circular(100))
-          ),
-          direction: SpeedDialDirection.up,
-          overlayColor: Colors.black,
-          overlayOpacity: 0.5,
-          buttonSize: Size(40,35),
-          elevation: 0,
-          childrenButtonSize: Size(40,40),
-          spaceBetweenChildren: 5,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          children: [
-            SpeedDialChild(
-              child: Icon(Icons.delete,size: 20,),
-              label: "Delete",
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              labelStyle: TextStyle(fontSize: 12),
-              onTap: () {
-                WidgetsCatalog.androidDialog(title: 'Delete Post', content: 'Are you sure delete this post?', onTapNo: (){
-                  Navigator.pop(context);
-                }, onTapYes: (){
-                  deletePost(cat.id, index);
-                }, context: context);
-              },
-            ),
-            SpeedDialChild(
-              child: Icon(Icons.brush,size: 20,),
-              label: "Clear",
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              labelStyle: TextStyle(fontSize: 12),
-              onTap: () {},
-            ),
-          ],
-        ),
+        PostCat(cat: cat),
+        speedDial(cat, index),
       ],
     );
   }
+
+  SpeedDial speedDial(Cat cat, int index) {
+    return SpeedDial(
+        icon: Icons.more_horiz,
+        iconTheme: const IconThemeData(
+          size: 35,
+
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomRight: Radius.circular(15),topLeft: Radius.circular(100))
+        ),
+        direction: SpeedDialDirection.up,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        buttonSize: Size(40,35),
+        elevation: 0,
+        childrenButtonSize: Size(40,40),
+        spaceBetweenChildren: 5,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.delete,size: 20,),
+            label: "Delete",
+            backgroundColor: Colors.redAccent,
+            foregroundColor: Colors.white,
+            labelStyle: TextStyle(fontSize: 12),
+            onTap: () {
+              WidgetsCatalog.androidDialog(title: 'Delete Post', content: 'Are you sure delete this post?', onTapNo: (){
+                Navigator.pop(context);
+              }, onTapYes: (){
+                deletePost(cat.id, index);
+              }, context: context);
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.brush,size: 20,),
+            label: "Clear",
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            labelStyle: TextStyle(fontSize: 12),
+            onTap: () {},
+          ),
+        ],
+      );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class WidgetsCatalog{
 
@@ -28,21 +29,26 @@ class WidgetsCatalog{
         });
   }
 
-  /// drawer Item
-  static  Widget createDrawerItem(
-      {required IconData icon,
-        required String text,
-        required GestureTapCallback onTap}) {
-    return ListTile(
-      title: Row(
-        children: <Widget>[
-          Icon(icon),
-          Padding(
-            padding: EdgeInsets.only(left: 8.0),
-            child: Text(text),
-          )
-        ],
-      ),
-      onTap: onTap,
+  static   AnimatedContainer loadMoreAnim(BuildContext context) {
+    return AnimatedContainer(
+      curve: Curves.easeIn,
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(color: Colors.white54),
+      duration: const Duration(milliseconds: 4),
+
+      /// Lottie_Loading appear when User reach last post and start Load More
+      child: Center(
+          child: Lottie.asset('assets/anims/loading.json',
+              width: 100)),
     );
-  }}
+  }
+
+  /// SnackBar
+  static void showSnackBar(BuildContext context, String content) {
+    SnackBar snackBar = SnackBar(
+      content: Text(content,style: const TextStyle(color: Colors.yellow),),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+}
