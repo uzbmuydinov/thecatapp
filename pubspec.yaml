@@ -23,6 +23,9 @@ dependencies:
   lottie: ^1.2.2
   url_launcher: ^6.0.17
   simple_animations: ^4.0.1
+  connectivity_plus: ^2.2.1
+  image_picker: ^0.8.4+10
+  flutter_speed_dial: ^5.0.0+1
 
 dev_dependencies:
   flutter_test:
@@ -43,7 +46,7 @@ flutter:
     - assets/images/
 
 
-#  fonts:
-#    - family: SansitaSwashed
-#      fonts:
-#        - asset: assets/fonts/SansitaSwashed.ttf
+  fonts:
+    - family: SansitaSwashed
+      fonts:
+        - asset: assets/fonts/SansitaSwashed.ttf

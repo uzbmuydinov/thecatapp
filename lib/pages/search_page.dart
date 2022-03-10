@@ -72,9 +72,7 @@ class _SearchPageState extends State<SearchPage> {
                         .toLowerCase()
                         .contains(search.toLowerCase()))
                     .toList());
-                return (search.isEmpty)
-                    ? postItems(temp[index])
-                    : postItems(temp[index]);
+                return postItems(temp[index]);
               },
             )
           : Center(

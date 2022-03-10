@@ -18,20 +18,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  DateTime? currentBackPressTime;
   bool isLoading = true;
   int selectedCategory = 0;
   bool isLoadMore = false;
   List<Cat> catList = [];
-  List<String> categories = [
-    "None",
-    "boxes",
-    "clothes",
-    "hats",
-    "sinks",
-    "space",
-    "sunglasses",
-  ];
 
   @override
   void initState() {
@@ -43,7 +33,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       isLoadMore = true;
     });
-    Network.GET(Network.API_LIST, Network.paramsGet((catList.length ~/ 10)+1)).then((value) {
+    Network.GET(
+        Network.API_LIST, Network.paramsGet(((catList.length ~/ 10) + 1)))
+        .then((value) {
       if (value != null) {
         catList.addAll(List.from(Network.parseCatList(value)));
         Log.i("Length : " + catList.length.toString());
@@ -60,57 +52,73 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: WillPopScope(
-        onWillPop: onWillPop,
-        child: Scaffold(
-          appBar: categoriesWidget(),
-          body: (isLoading)
-              ? Center(
-                  child: Lottie.asset('assets/anims/loading.json', width: 100))
-              : Stack(
-                  children: [
-                    /// NotificationListener work when User reach last post
-                    NotificationListener<ScrollNotification>(
-                      onNotification: (ScrollNotification scrollInfo) {
-                        if (!isLoadMore &&
-                            scrollInfo.metrics.pixels ==
-                                scrollInfo.metrics.maxScrollExtent) {
-                          getCatImages();
-                          // start loading data
-                          setState(() {});
-                        }
-                        return true;
-                      },
-                      child: MasonryGridView.count(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        itemCount: catList.length,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        itemBuilder: (context, index) {
-                          return postItems(catList[index]);
-                        },
-                      ),
-                    ),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(onPressed: () {},
+              icon: const Icon(CupertinoIcons.line_horizontal_3, size: 30,
+                color: Colors.black,)),
+          title: const Text('All Cats', style: TextStyle(
+              fontFamily: 'SansitaSwashed',
+              color: Colors.black,
+              fontSize: 28,
+              fontWeight: FontWeight.bold)),
+          centerTitle: true,
+        ),
+        body: (isLoading)
+            ? Center(
+            child: Lottie.asset('assets/anims/loading.json', width: 100))
+            : Stack(
+          children: [
 
-                    /// Lottie_Loading appear when User reach last post and start Load More
-                    isLoadMore
-                        ? AnimatedContainer(
-                            curve: Curves.easeIn,
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(color: Colors.white54),
-                            duration: const Duration(milliseconds: 4),
+            /// NotificationListener work when User reach last post
+            NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!isLoadMore &&
+                    scrollInfo.metrics.pixels ==
+                        scrollInfo.metrics.maxScrollExtent) {
+                  getCatImages();
+                  // start loading data
+                  setState(() {});
+                }
+                return true;
+              },
+              child: MasonryGridView.count(
+                padding:
+                EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                itemCount: catList.length,
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                itemBuilder: (context, index) {
+                  return postItems(catList[index]);
+                },
+              ),
+            ),
 
-                            /// Lottie_Loading appear when User reach last post and start Load More
-                            child: Center(
-                                child: Lottie.asset('assets/anims/loading.json',
-                                    width: 100)),
-                          )
-                        : SizedBox.shrink(),
-                  ],
-                ),
+            /// Lottie_Loading appear when User reach last post and start Load More
+            isLoadMore
+                ? AnimatedContainer(
+              curve: Curves.easeIn,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
+              decoration: BoxDecoration(color: Colors.white54),
+              duration: const Duration(milliseconds: 4),
+
+              /// Lottie_Loading appear when User reach last post and start Load More
+              child: Center(
+                  child: Lottie.asset('assets/anims/loading.json',
+                      width: 100)),
+            )
+                : const SizedBox.shrink(),
+          ],
         ),
       ),
     );
@@ -125,10 +133,11 @@ class _HomePageState extends State<HomePage> {
             Navigator.of(context).push(PageRouteBuilder(
                 fullscreenDialog: true,
                 transitionDuration: Duration(milliseconds: 1000),
-                pageBuilder: (BuildContext context,
-                    Animation<double> animation,
+                pageBuilder: (BuildContext context, Animation<double> animation,
                     Animation<double> secondaryAnimation) {
-                  return DetailPage(cat: cat,);
+                  return DetailPage(
+                    cat: cat,
+                  );
                 },
                 transitionsBuilder: (BuildContext context,
                     Animation<double> animation,
@@ -138,7 +147,6 @@ class _HomePageState extends State<HomePage> {
                     opacity: CurvedAnimation(
                       parent: animation,
                       curve: Curves.elasticInOut,
-
                     ),
                     child: child,
                   );
@@ -150,13 +158,14 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(15),
               child: CachedNetworkImage(
                 imageUrl: cat.url,
-                placeholder: (context, index) => AspectRatio(
-                  aspectRatio: cat.width / cat.height,
-                  child: Image(
-                    fit: BoxFit.cover,
-                    image: AssetImage("assets/images/im_placeholder.png"),
-                  ),
-                ),
+                placeholder: (context, index) =>
+                    AspectRatio(
+                      aspectRatio: cat.width / cat.height,
+                      child: Image(
+                        fit: BoxFit.cover,
+                        image: AssetImage("assets/images/im_placeholder.png"),
+                      ),
+                    ),
               ),
             ),
           ),
@@ -165,58 +174,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// App Bar Categories
-  PreferredSize categoriesWidget() {
-    return PreferredSize(
-        child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              /// TextBUtton
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedCategory = index;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.all(15),
-                    shape: StadiumBorder(),
-                    backgroundColor: (selectedCategory == index)
-                        ? Colors.black
-                        : Colors.grey.shade300,
-                  ),
-                  child: Text(
-                    categories[index],
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: (selectedCategory == index)
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                ),
-              );
-            }),
-        preferredSize: Size(double.infinity, 60));
-  }
-
-  /// Will pop
-  Future<bool> onWillPop() {
-    DateTime now = DateTime.now();
-    if (currentBackPressTime == null ||
-        now.difference(currentBackPressTime!) > Duration(seconds: 2)) {
-      setState(() {
-        currentBackPressTime = now;
-      });
-
-      return Future.value(false);
-    }
-    return Future.value(true);
-  }
 }

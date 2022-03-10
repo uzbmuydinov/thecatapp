@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:thecatapp/models/breed_model.dart';
 import 'package:thecatapp/models/cat_model.dart';
 
@@ -16,7 +18,8 @@ class Network {
   /// * Http Apis *///
   static String API_LIST = "/v1/images/search";
   static String API_LIST_Breeds = "/v1/breeds";
-
+  static String API_UPLOAD = "/v1/images/upload";
+  static String API_GET_UPLOADS = "/v1/images/";
 
   // static String API_SEARCH_PHOTOS = '/search/photos';
 
@@ -27,6 +30,14 @@ class Network {
       "Content-Type": "application/json",
     };
     return header;
+  }
+
+  static Map<String, String> getUploadHeaders() {
+    Map<String, String> headers = {
+      'Content-Type': 'multipart/form-data',
+      'x-api-key': '427308b2-632e-4532-a9c9-75d8506bd708'
+    };
+    return headers;
   }
 
   /// Selecting Test Server or Production Server  ///
@@ -47,6 +58,34 @@ class Network {
     return null;
   }
 
+  /// POST method///
+  static Future<String?> POST(String api, String filePath, Map<String, String> params) async {
+    var uri = Uri.https(getServer(), api);
+    var request = MultipartRequest('POST', uri);
+    request.headers.addAll(getUploadHeaders());
+    request.files.add(await MultipartFile.fromPath('file', filePath,
+        contentType: MediaType("image", "jpeg")));
+    request.fields.addAll(params);
+    StreamedResponse response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return await response.stream.bytesToString();
+    } else {
+      return response.reasonPhrase;
+    }
+  }
+
+  /// DELETE method ///
+
+  /// DELETE ///
+  static Future<String?> DEL(String api, Map<String, String> params) async {
+    var uri = Uri.https(getServer(), api, params); // http or https
+    var response = await delete(uri,headers: getHeaders());
+    Log.e(response.body);
+    if (response.statusCode == 200) return response.body;
+    return null;
+  }
+
+
   /// * Http Params * ///
 
   /// GET PARAM
@@ -54,28 +93,46 @@ class Network {
     Map<String, String> params = {
       'limit': '10',
       'page': '$page',
+      'order': 'DESC',
+    };
+    return params;
+  }
+
+  ///  CATEGORY PARAM
+  static Map<String, String> paramsCategoryGet(int page, int id) {
+    Map<String, String> params = {
+      'limit': '10',
+      'page': '$page',
+      'category_ids': '$id',
       'order': 'Desc',
     };
     return params;
   }
 
-  /// GET PARAM EMPTY
+  /// PARAM EMPTY
   static Map<String, String> paramEmpty() {
     Map<String, String> params = {};
     return params;
   }
 
-  static Map<String, String> paramSearch(String id,int page) {
+  ///  PARAM SEARCH
+  static Map<String, String> paramSearch(String id, int page) {
     Map<String, String> params = {
       'limit': '10',
       'page': '$page',
-      'breed_ids':id,
+      'breed_ids': id,
     };
     return params;
   }
 
 
-  /// PARSING ///
+  /// PARAM POST ///
+  static Map<String, String> paramsCreate() {
+    Map<String, String> params = {'sub_id': ''};
+    return params;
+  }
+
+  /// * PARSING * ///
 
   static List<Cat> parseCatList(String response) {
     var data = catListFromJson(response);
@@ -88,10 +145,7 @@ class Network {
   }
 
   static List<Breeds> parseSearch(String response) {
-
     var data = breedsListFromJson(response);
     return data;
   }
-
-
 }

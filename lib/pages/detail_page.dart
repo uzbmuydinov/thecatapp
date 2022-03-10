@@ -51,7 +51,7 @@ class _DetailPageState extends State<DetailPage>
     _controller.dispose();
   }
 
-  /// Get Images
+  /// Send Response
   void apiResponse(String search) {
     Network.GET(Network.API_LIST,
             Network.paramSearch(search, (breedsList.length ~/ 10) + 1))
@@ -60,6 +60,7 @@ class _DetailPageState extends State<DetailPage>
     });
   }
 
+  /// Get Images
   void getImages(String? value) {
     try{
       if (value != null) {
@@ -88,19 +89,21 @@ class _DetailPageState extends State<DetailPage>
       ),
       body: (widget.cat != null)
           ? Hero(
-              tag: widget.cat!.id,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
+            tag: widget.cat!.id,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: InteractiveViewer(
                 child: CachedNetworkImage(
-                  imageUrl: widget.cat!.url,
-                  placeholder: (context, index) => AspectRatio(
-                      aspectRatio: widget.cat!.width / widget.cat!.height,
-                      child: Container(
-                        color: Colors.grey.shade200,
-                      )),
-                ),
+                    imageUrl: widget.cat!.url,
+                    placeholder: (context, index) => AspectRatio(
+                        aspectRatio: widget.cat!.width / widget.cat!.height,
+                        child: Container(
+                          color: Colors.grey.shade200,
+                        )),
+                  ),
               ),
-            )
+            ),
+          )
           : Hero(
               tag: widget.breed!.image!.id!,
               child: Container(
@@ -144,14 +147,16 @@ class _DetailPageState extends State<DetailPage>
           color: Colors.white,
           child: Column(
             children: [
-              CachedNetworkImage(
-                imageUrl: widget.breed!.image!.url!,
-                placeholder: (context, index) => AspectRatio(
-                    aspectRatio: widget.breed!.image!.width! /
-                        widget.breed!.image!.height!,
-                    child: Container(
-                      color: Colors.grey.shade200,
-                    )),
+              InteractiveViewer(
+                child: CachedNetworkImage(
+                  imageUrl: widget.breed!.image!.url!,
+                  placeholder: (context, index) => AspectRatio(
+                      aspectRatio: widget.breed!.image!.width! /
+                          widget.breed!.image!.height!,
+                      child: Container(
+                        color: Colors.grey.shade200,
+                      )),
+                ),
               ),
             ],
           ),
