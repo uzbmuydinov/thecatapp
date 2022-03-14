@@ -202,7 +202,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                 setState(() {});
               },
               decoration: const InputDecoration(
-                  hintText: "Search your Pins",
+                  hintText: "Search your photos",
                   hintStyle: TextStyle(
                       color: Colors.black, decoration: TextDecoration.none),
                   prefixIcon: Icon(
@@ -250,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
           height: 10,
         ),
         const Text(
-          "Christopher Robin",
+          "Uzbmuydinov",
           style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
@@ -258,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
           height: 5,
         ),
         const Text(
-          "@christoph123",
+          "uzbmuydinov@gmail.com",
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 14, color: Colors.grey),
         ),
@@ -269,13 +269,13 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
             Text(
-              '0 followers ',
+              '1 K followers ',
               style: TextStyle(
                 fontSize: 14,
               ),
             ),
             Text(
-              "• 0 following",
+              "• 532 following",
               style: TextStyle(
                 fontSize: 14,
               ),

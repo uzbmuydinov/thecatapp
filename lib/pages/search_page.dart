@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:lottie/lottie.dart';
 import 'package:thecatapp/models/breed_model.dart';
 import 'package:thecatapp/utils/post_breed.dart';
 import 'package:thecatapp/utils/utils.dart';
@@ -90,7 +89,7 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.05,
+              height: MediaQuery.of(context).size.height * 0.045,
             ),
             Container(
               width: MediaQuery.of(context).size.width * 0.8,
@@ -110,7 +109,7 @@ class _SearchPageState extends State<SearchPage> with AutomaticKeepAliveClientMi
                   });
                 },
                 decoration: InputDecoration(
-                    hintText: "Search for ideas",
+                    hintText: "Search image",
                     hintStyle: TextStyle(
                         color: Colors.grey.shade400,
                         decoration: TextDecoration.none),

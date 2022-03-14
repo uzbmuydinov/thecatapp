@@ -17,7 +17,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   bool isLoading = true;
   int selectedCategory = 0;
   bool isLoadMore = false;
@@ -34,7 +35,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
       isLoadMore = true;
     });
     Network.GET(
-        Network.API_LIST, Network.paramsGet(((catList.length ~/ 10) + 1)))
+            Network.API_LIST, Network.paramsGet(((catList.length ~/ 10) + 1)))
         .then((value) {
       if (value != null) {
         catList.addAll(List.from(Network.parseCatList(value)));
@@ -56,59 +57,54 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(onPressed: () {},
-              icon: const Icon(CupertinoIcons.line_horizontal_3, size: 30,
-                color: Colors.black,)),
-          title: const Text('All Cats', style: TextStyle(
-              fontFamily: 'SansitaSwashed',
-              color: Colors.black,
-              fontSize: 28,
-              fontWeight: FontWeight.bold)),
+          title: const Text('All Cats',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
         body: (isLoading)
             ? Center(
-            child: Lottie.asset('assets/anims/loading.json', width: 100))
+                child: Lottie.asset('assets/anims/loading.json', width: 100))
             : Stack(
-          children: [
+                children: [
+                  /// NotificationListener work when User reach last post
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (!isLoadMore &&
+                          scrollInfo.metrics.pixels ==
+                              scrollInfo.metrics.maxScrollExtent) {
+                        getCatImages();
+                        // start loading data
+                        setState(() {});
+                      }
+                      return true;
+                    },
+                    child: MasonryGridView.count(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      itemCount: catList.length,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      itemBuilder: (context, index) {
+                        return PostCat(cat: catList[index]);
+                      },
+                    ),
+                  ),
 
-            /// NotificationListener work when User reach last post
-            NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification scrollInfo) {
-                if (!isLoadMore &&
-                    scrollInfo.metrics.pixels ==
-                        scrollInfo.metrics.maxScrollExtent) {
-                  getCatImages();
-                  // start loading data
-                  setState(() {});
-                }
-                return true;
-              },
-              child: MasonryGridView.count(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                itemCount: catList.length,
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                itemBuilder: (context, index) {
-                  return PostCat(cat: catList[index]);
-                },
+                  /// Lottie_Loading appear when User reach last post and start Load More
+                  isLoadMore
+                      ? WidgetsCatalog.loadMoreAnim(context)
+                      : const SizedBox.shrink(),
+                ],
               ),
-            ),
-
-            /// Lottie_Loading appear when User reach last post and start Load More
-            isLoadMore
-                ? WidgetsCatalog.loadMoreAnim(context)
-                : const SizedBox.shrink(),
-          ],
-        ),
       ),
     );
   }
 
-
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
-
 }

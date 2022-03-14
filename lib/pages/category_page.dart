@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:lottie/lottie.dart';
 import 'package:thecatapp/models/cat_model.dart';
-import 'package:thecatapp/pages/detail_page.dart';
+
 import 'package:thecatapp/services/http_service.dart';
 import 'package:thecatapp/utils/glow_widget.dart';
 import 'package:thecatapp/utils/post_cat.dart';
@@ -19,7 +19,8 @@ class CategoryPage extends StatefulWidget {
   _CategoryPageState createState() => _CategoryPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClientMixin {
+class _CategoryPageState extends State<CategoryPage>
+    with AutomaticKeepAliveClientMixin {
   bool isLoading = true;
   int selectedCategory = 1;
   int selected = 0;
@@ -46,8 +47,8 @@ class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClie
     setState(() {
       isLoadMore = true;
     });
-    Network.GET(
-            Network.API_LIST, Network.paramsCategoryGet(((catList.length ~/ 10) + 1),categoryId))
+    Network.GET(Network.API_LIST,
+            Network.paramsCategoryGet(((catList.length ~/ 10) + 1), categoryId))
         .then((value) {
       if (value != null) {
         catList.addAll(List.from(Network.parseCatList(value)));
@@ -70,74 +71,77 @@ class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClie
             ? Center(
                 child: Lottie.asset('assets/anims/loading.json', width: 100))
             :
+
             /// NotificationListener work when User reach last post
             Stack(
-              children: [
-                Glow(
-                  child: NestedScrollView(
-                    floatHeaderSlivers: true,
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      return [
-                        SliverList(
-                            delegate: SliverChildListDelegate([
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.14,
-                            child: ListView.builder(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 5),
-                                itemCount: categories.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (ctx, index) {
-                                  return storyItems(index);
-                                }),
-                          ),
-                        ]))
-                      ];
-                    },
-                    body: NotificationListener<ScrollNotification>(
-                      onNotification: (ScrollNotification scrollInfo) {
-                        if (!isLoadMore &&
-                            scrollInfo.metrics.pixels ==
-                                scrollInfo.metrics.maxScrollExtent) {
-                          getCatImages(selectedCategory);
-                          // start loading data
-                          setState(() {});
-                        }
-                        return true;
+                children: [
+                  Glow(
+                    child: NestedScrollView(
+                      floatHeaderSlivers: true,
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return [
+                          SliverList(
+                              delegate: SliverChildListDelegate([
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.14,
+                              child: ListView.builder(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 5),
+                                  itemCount: categories.length,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (ctx, index) {
+                                    return storyItems(index);
+                                  }),
+                            ),
+                          ]))
+                        ];
                       },
-                      child: MasonryGridView.count(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        itemCount: catList.length,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        itemBuilder: (context, index) {
-                          return PostCat(cat:catList[index]);
+                      body: NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification scrollInfo) {
+                          if (!isLoadMore &&
+                              scrollInfo.metrics.pixels ==
+                                  scrollInfo.metrics.maxScrollExtent) {
+                            getCatImages(selectedCategory);
+                            // start loading data
+                            setState(() {});
+                          }
+                          return true;
                         },
+                        child: MasonryGridView.count(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          itemCount: catList.length,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          itemBuilder: (context, index) {
+                            return PostCat(cat: catList[index]);
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-                /// Lottie_Loading appear when User reach last post and start Load More
-                isLoadMore
-                    ? WidgetsCatalog.loadMoreAnim(context)
-                    : SizedBox.shrink(),
-              ],
-            ),
+
+                  /// Lottie_Loading appear when User reach last post and start Load More
+                  isLoadMore
+                      ? WidgetsCatalog.loadMoreAnim(context)
+                      : SizedBox.shrink(),
+                ],
+              ),
       ),
     );
   }
 
-
   Widget storyItems(int index) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         setState(() {
           catList.clear();
           selected = index;
-          (index != 7) ? (selectedCategory = index+1) : (selectedCategory = 9);
+          (index != 7)
+              ? (selectedCategory = index + 1)
+              : (selectedCategory = 9);
           getCatImages(selectedCategory);
         });
       },
@@ -153,7 +157,9 @@ class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClie
               padding: EdgeInsets.all(1.5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(70),
-                border: (selected != index)?Border.all(color: Colors.purple, width: 3):null,
+                border: (selected != index)
+                    ? Border.all(color: Colors.purple, width: 3)
+                    : null,
               ),
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(70),
@@ -169,15 +175,16 @@ class _CategoryPageState extends State<CategoryPage> with AutomaticKeepAliveClie
             Text(
               categories[index],
               style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             )
           ],
         ),
       ),
     );
   }
+
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
