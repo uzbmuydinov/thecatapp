@@ -40,7 +40,6 @@ class _ControlPageState extends State<ControlPage> {
     super.dispose();
     _connectivitySubscription.cancel();
     _pageController.dispose();
-
   }
 
   Future<void> initConnectivity() async {
@@ -68,11 +67,10 @@ class _ControlPageState extends State<ControlPage> {
       setState(() {
         isOffline = true;
       });
-    }
-    else{
+    } else {
       setState(() {
         isOffline = false;
-        selectedPage=0;
+        selectedPage = 0;
       });
     }
   }
@@ -82,7 +80,13 @@ class _ControlPageState extends State<ControlPage> {
     return WillPopScope(
       onWillPop: onWillPop,
       child: (isOffline)
-          ? WidgetsCatalog.loadMoreAnim(context)
+          ? Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: Center(
+                  child: Lottie.asset('assets/anims/no_internet.json',
+                      width: 100)),
+            )
           : Scaffold(
               backgroundColor: Colors.white,
               body: Glow(
@@ -104,58 +108,58 @@ class _ControlPageState extends State<ControlPage> {
 
   BottomNavigationBar buildBottomNavigationBar() {
     return BottomNavigationBar(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              fixedColor: Colors.black,
-              selectedFontSize: 14,
-              currentIndex: selectedPage,
-              onTap: (index) {
-                setState(() {
-                  _pageController.jumpToPage(index);
-                  selectedPage = index;
-                });
-              },
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Image(
-                      color: (selectedPage == 0) ? Colors.black : null,
-                      width: 25,
-                      height: 25,
-                      image: const AssetImage('assets/icons/ic_home.png')),
-                  label: "Home",
-                ),
-                BottomNavigationBarItem(
-                  icon: Image(
-                      color: (selectedPage == 1) ? Colors.black : null,
-                      width: 25,
-                      height: 25,
-                      image: const AssetImage('assets/icons/ic_search.png')),
-                  label: "Search",
-                ),
-                const BottomNavigationBarItem(
-                  icon: Image(
-                      // color : (selectedPage ==2) ? Colors.black : null,
-                      width: 25,
-                      height: 25,
-                      fit: BoxFit.cover,
-                      image: AssetImage(
-                        'assets/icons/ic_cat2.png',
-                      )),
-                  label: "Categories",
-                ),
-                 BottomNavigationBarItem(
-                  icon: Image(
-                     color : (selectedPage ==3) ? Colors.black : Colors.grey.shade700,
-                      width: 25,
-                      height: 25,
-                      fit: BoxFit.cover,
-                      image: AssetImage(
-                        'assets/icons/ic_account.png',
-                      )),
-                  label: "Account",
-                ),
-              ],
-            );
+      backgroundColor: Colors.white,
+      elevation: 0,
+      fixedColor: Colors.black,
+      selectedFontSize: 14,
+      currentIndex: selectedPage,
+      onTap: (index) {
+        setState(() {
+          _pageController.jumpToPage(index);
+          selectedPage = index;
+        });
+      },
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Image(
+              color: (selectedPage == 0) ? Colors.black : null,
+              width: 25,
+              height: 25,
+              image: const AssetImage('assets/icons/ic_home.png')),
+          label: "Home",
+        ),
+        BottomNavigationBarItem(
+          icon: Image(
+              color: (selectedPage == 1) ? Colors.black : null,
+              width: 25,
+              height: 25,
+              image: const AssetImage('assets/icons/ic_search.png')),
+          label: "Search",
+        ),
+        const BottomNavigationBarItem(
+          icon: Image(
+              // color : (selectedPage ==2) ? Colors.black : null,
+              width: 25,
+              height: 25,
+              fit: BoxFit.cover,
+              image: AssetImage(
+                'assets/icons/ic_cat2.png',
+              )),
+          label: "Categories",
+        ),
+        BottomNavigationBarItem(
+          icon: Image(
+              color: (selectedPage == 3) ? Colors.black : Colors.grey.shade700,
+              width: 25,
+              height: 25,
+              fit: BoxFit.cover,
+              image: AssetImage(
+                'assets/icons/ic_account.png',
+              )),
+          label: "Account",
+        ),
+      ],
+    );
   }
 
   /// Will pop

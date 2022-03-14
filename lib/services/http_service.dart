@@ -2,13 +2,11 @@ import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:thecatapp/models/breed_model.dart';
 import 'package:thecatapp/models/cat_model.dart';
-import 'package:thecatapp/utils/utils.dart';
-
 import 'log_service.dart';
 
 class Network {
   /// Set isTester ///
-  static bool isTester = true;
+  static bool isTester = false;
 
   /// Servers Types ///
   static String SERVER_DEVELOPMENT = "api.thecatapi.com";
